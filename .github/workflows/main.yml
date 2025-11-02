@@ -91,7 +91,7 @@ jobs:
     - name: Create the necessary folders
       run: |
         cd /tmp/
-        mkdir -p $OPENSSL_EXTRACT_DIR_PATH
+        mkdir -p $OPENSSL_EXTRACT_DIR_PATH $ZLIB_EXTRACT_DIR_PATH $LIBEVEN_EXTRACT_DIR_PATH $TOR_EXTRACT_DIR_PATH
 
     - name: Download the necessary packages
       run: |
@@ -104,10 +104,10 @@ jobs:
       run: |
         cd /tmp/
         tar -xzf $OPENSSL_TAR_PATH -C $OPENSSL_EXTRACT_DIR_PATH --strip-components=1
-
+        
         cd $OPENSSL_EXTRACT_DIR_PATH
         ./config --prefix=$OPENSSL_BUILD_PATH no-shared no-dso no-docs > /dev/null
         make -j$(nproc) > /dev/null
         make install
 
-        ls -alh $OPENSSL_BUILD_PATH
+        find $OPENSSL_BUILD_PATH -type f
