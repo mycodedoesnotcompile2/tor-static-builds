@@ -91,7 +91,7 @@ jobs:
     - name: Create the necessary folders
       run: |
         cd /tmp/
-        mkdir -p $OPENSSL_EXTRACT_DIR_PATH $ZLIB_EXTRACT_DIR_PATH $LIBEVEN_EXTRACT_DIR_PATH $TOR_EXTRACT_DIR_PATH
+        mkdir -p $OPENSSL_EXTRACT_DIR_PATH $ZLIB_EXTRACT_DIR_PATH $LIBEVENT_EXTRACT_DIR_PATH $TOR_EXTRACT_DIR_PATH
 
     - name: Download the necessary packages
       run: |
@@ -99,6 +99,7 @@ jobs:
         wget -nv $ZLIB_DL -O $ZLIB_TAR_PATH
         wget -nv $LIBEVENT_DL -O $LIBEVENT_TAR_PATH
         wget -nv $TOR_DL -O $TOR_TAR_PATH
+        
     
     - name: Compile OpenSSL
       run: |
@@ -110,4 +111,47 @@ jobs:
         make -j$(nproc) > /dev/null
         make install
 
-        find $OPENSSL_BUILD_PATH -type f
+        find $OPENSSL_BUILD_PATH -type f -ls
+
+
+    - name: Compile ZLIB
+      run: |
+        cd /tmp/
+        tar -xzf $ZLIB_TAR_PATH -C $ZLIB_EXTRACT_DIR_PATH --strip-components=1
+        
+        cd $ZLIB_EXTRACT_DIR_PATH
+        ./configure --prefix=$ZLIB_BUILD_PATH --static
+        make -j$(nproc) > /dev/null
+        make install
+
+        find $ZLIB_BUILD_PATH -type f -ls
+
+    - name: Compile Libevent
+      run: |
+        cd /tmp/
+        tar -xzf $LIBEVENT_TAR_PATH -C $LIBEVENT_EXTRACT_DIR_PATH --strip-components=1
+        
+        cd $LIBEVENT_EXTRACT_DIR_PATH
+        PKG_CONFIG_PATH="$OPENSSL_BUILD_PATH/lib64/pkgconfig" ./configure --prefix=$LIBEVENT_BUILD_PATH --disable-shared --enable-static --with-pic
+        make -j$(nproc) > /dev/null
+        make install
+
+        find $LIBEVENT_BUILD_PATH -type f -ls
+
+    - name: Compile TOR
+      run: |
+        cd /tmp/
+        tar -xzf $TOR_TAR_PATH -C $TOR_EXTRACT_DIR_PATH --strip-components=1
+        
+        cd $TOR_EXTRACT_DIR_PATH
+        CPPFLAGS="-I$OPENSSL_BUILD_PATH/install/include" ./configure --prefix=$TOR_STATIC_BUILD_PATH \
+                                      --disable-asciidoc --disable-manpage --disable-html-manual --disable-unittests \
+                                      --enable-static-tor --enable-static-libevent \
+                                      --with-libevent-dir=$LIBEVENT_BUILD_PATH \
+                                      --enable-static-openssl --with-openssl-dir=$OPENSSL_BUILD_PATH/lib64 \
+                                      --enable-static-zlib --with-zlib-dir=$ZLIB_BUILD_PATH
+        
+        make -j$(nproc) > /dev/null
+        make install
+
+        find $TOR_STATIC_BUILD_PATH -type f -ls
