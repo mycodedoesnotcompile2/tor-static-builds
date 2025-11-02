@@ -33,9 +33,8 @@ jobs:
           - CONTAINER: debian:bookworm
             LIBC: glibc
 
-          - CONTAINER: frolvlad/alpine‑bash:latest
+          - CONTAINER: frolvlad/alpine-bash:latest
             LIBC: musl
-      
             
     runs-on: ${{ matrix.OS }}
     container:
@@ -45,7 +44,7 @@ jobs:
     - name: Install prerequisites
       run: |
         if [[ $CONTAINER =~ "debian" ]]; then
-          $APT update && $APT install -y build-essential file sudo bash
+          apt update && apt install -y build-essential file sudo bash
           
           sudo dpkg --get-selections | grep -i libssl
           $APT autoremove --purge libssl-dev
