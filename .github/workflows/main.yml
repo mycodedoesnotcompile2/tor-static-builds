@@ -60,8 +60,8 @@ jobs:
         fi
         
         if [[ $CONTAINER =~ "alpine" ]]; then
-          apk update && apk add build-base file sudo bash
-          apk del libssl-dev
+          apk -q update && apk -q add build-base file sudo bash
+          apk del openssl-dev
         fi
         
         sudo chsh root -s /bin/bash
