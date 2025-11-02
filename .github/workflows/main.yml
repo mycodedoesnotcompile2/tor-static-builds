@@ -41,7 +41,14 @@ jobs:
     steps:
     - name: Install prerequisites
       run: |
-        $APT update && $APT install -y build-essential file sudo bash
+        if [[ $CONTAINER =~ debian ]]; then
+          $APT update && $APT install -y build-essential file sudo bash
+        fi
+        
+        if [[ $CONTAINER =~ debian ]]; then
+          apk update && apk add -y build-essential file sudo bash
+        fi
+        
         chsh root -s /bin/bash
         chsh runner -s /bin/bash
     
