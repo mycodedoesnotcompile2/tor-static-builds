@@ -24,22 +24,31 @@ jobs:
       fail-fast: false
       matrix:
         ARCH: [x86_64, aarch64]
-        LIBC: [glib, musl]
+        LIBC: [glibc, musl]
         include:
           - OS: ubuntu-latest
             ARCH: x86_64
           
           - OS: ubuntu-24.04-arm
             ARCH: aarch64
+
+          - CONTAINER: debian:bookworm
+            LIBC: glibc
+
+          - CONTAINER: alpine:latest
+            LIBC: musl
       
             
     runs-on: ${{ matrix.OS }}
     container:
-      image: ${{ matrix.container }}
+      image: ${{ matrix.CONTAINER }}
   
     steps:
     - name: Install prerequisites
       run: |
         $APT update && $APT install -y build-essential file
+    
+    - name: Check if libssl-dev is not installed
+      run: |
         $APT autoremove --purge libssl-dev
         sudo dpkg --get-selections | grep -i libssl
