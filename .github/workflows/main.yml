@@ -60,7 +60,7 @@ jobs:
         fi
         
         if [[ $CONTAINER =~ "alpine" ]]; then
-          apk -q update && apk -q add build-base file sudo bash shadow
+          apk -q update && apk -q add build-base file sudo bash shadow musl
           apk del openssl-dev
         fi
         
