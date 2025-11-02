@@ -153,7 +153,7 @@ jobs:
         tar -xzf $TOR_TAR_PATH -C $TOR_EXTRACT_DIR_PATH --strip-components=1
         
         cd $TOR_EXTRACT_DIR_PATH
-        CPPFLAGS="-I$OPENSSL_BUILD_PATH/install/include" ./configure --prefix=$TOR_STATIC_BUILD_PATH \
+        CPPFLAGS="-I$OPENSSL_BUILD_PATH/include" ./configure --prefix=$TOR_STATIC_BUILD_PATH \
                                       --disable-asciidoc --disable-manpage --disable-html-manual --disable-unittests \
                                       --enable-static-tor --enable-static-libevent \
                                       --with-libevent-dir=$LIBEVENT_BUILD_PATH \
