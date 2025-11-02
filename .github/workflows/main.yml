@@ -185,7 +185,7 @@ jobs:
         cd $TOR_STATIC_PACKAGE_DIR_PATH
         
         TOR_PREFIX=$(basename $TOR_DL .tar.gz)
-        TOR_VERSION="$(date +"%Y-%m-%dT%H:%M:%S%z)-$TOR_PREFIX"
+        TOR_VERSION="$(date +'%Y-%m-%d')-$TOR_PREFIX"
         echo "TOR_VERSION=$TOR_PREFIX" >> $GITHUB_OUTPUT
         
         TOR_STATIC_PACKAGE_FILENAME="$TOR_PREFIX-linux-$ARCH-$LIBC.zip"
@@ -206,7 +206,6 @@ jobs:
         path: |
           ${{ env.TOR_STATIC_PACKAGE_FILE_PATH }}
           ${{ env.TOR_STATIC_PACKAGE_HASH_PATH }}
-
 
   deploy_release:
     needs: build
