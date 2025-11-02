@@ -78,7 +78,7 @@ jobs:
     - name: Install prerequisites
       run: |
         if [[ $CONTAINER =~ "debian" ]]; then
-          $APT update && $APT install -y build-essential file sudo bash wget tar pkg-config
+          $APT update && $APT install -y build-essential file sudo bash wget tar pkg-config zip
           
           dpkg --get-selections | grep -i libssl
           $APT autoremove --purge libssl-dev
