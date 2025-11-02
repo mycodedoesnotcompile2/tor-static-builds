@@ -171,7 +171,7 @@ jobs:
 
         find $TOR_STATIC_BUILD_PATH -type f -exec ls -alh {} \;
 
-    - name: Check static-ness of TOR binaries and display version
+    - name: Check static-ness of TOR binaries and display build information
       run: |
         cd /tmp/
         
