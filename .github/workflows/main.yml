@@ -33,6 +33,7 @@ jobs:
           - CONTAINER: debian:bookworm
             LIBC: glibc
 
+            # remember to build a custom alpine image with bash
           - CONTAINER: frolvlad/alpine-bash:latest
             LIBC: musl
             
@@ -51,19 +52,18 @@ jobs:
     - name: Install prerequisites
       run: |
         if [[ $CONTAINER =~ "debian" ]]; then
-          apt update && apt install -y build-essential file sudo bash
+          $APT update && $APT install -y build-essential file sudo bash
           
-          sudo dpkg --get-selections | grep -i libssl
+          $APT dpkg --get-selections | grep -i libssl
           $APT autoremove --purge libssl-dev
         fi
         
         if [[ $CONTAINER =~ "alpine" ]]; then
-          apk update && apk add -y build-essential file sudo bash
+          apk update && apk add build-essential file sudo bash
           apk del libssl-dev
         fi
         
         sudo chsh root -s /bin/bash
-        sudo chsh runner -s /bin/bash
     
     # - name: Check if libssl-dev is not installed
     #   run: |
