@@ -1,0 +1,45 @@
+name: Build binaries
+
+on:
+  workflow_dispatch
+  #schedule:
+  #  - cron: '5 5 * * *'
+
+permissions:
+  contents: write
+
+env:
+  ONIUX_ROOT_DIR: /tmp/oniux
+  APT: sudo apt -y -qq -o=Dpkg::Use-Pty=0
+
+
+defaults:
+  run:
+    # necessary for windows
+    shell: bash
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        ARCH: [x86_64, aarch64]
+        LIBC: [glib, musl]
+        include:
+          - OS: ubuntu-latest
+            ARCH: x86_64
+          
+          - OS: ubuntu-24.04-arm
+            ARCH: aarch64
+      
+            
+    runs-on: ${{ matrix.OS }}
+    container:
+      image: ${{ matrix.container }}
+  
+    steps:
+    - name: Install prerequisites
+      run: |
+        $APT update && $APT install -y build-essential file
+        $APT autoremove --purge libssl-dev
+        sudo dpkg --get-selections | grep -i libssl
