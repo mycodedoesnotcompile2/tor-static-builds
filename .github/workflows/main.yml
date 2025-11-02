@@ -74,14 +74,14 @@ jobs:
     - name: Install prerequisites
       run: |
         if [[ $CONTAINER =~ "debian" ]]; then
-          $APT update && $APT install -y build-essential file sudo bash wget tar
+          $APT update && $APT install -y build-essential file sudo bash wget tar pkg-config
           
           dpkg --get-selections | grep -i libssl
           $APT autoremove --purge libssl-dev
         fi
         
         if [[ $CONTAINER =~ "alpine" ]]; then
-          apk -q update && apk add build-base file sudo bash shadow musl wget make tar perl linux-headers
+          apk -q update && apk add build-base file sudo bash shadow musl wget make tar perl linux-headers pkgconfig
           apk del openssl-dev
         fi
         
@@ -131,6 +131,10 @@ jobs:
         tar -xzf $LIBEVENT_TAR_PATH -C $LIBEVENT_EXTRACT_DIR_PATH --strip-components=1
         
         cd $LIBEVENT_EXTRACT_DIR_PATH
+        
+        echo "$OPENSSL_BUILD_PATH/lib64/pkgconfig"
+        ls -alh "$OPENSSL_BUILD_PATH/lib64/pkgconfig"
+        
         PKG_CONFIG_PATH="$OPENSSL_BUILD_PATH/lib64/pkgconfig" ./configure --prefix=$LIBEVENT_BUILD_PATH --disable-shared --enable-static --with-pic
         make -j$(nproc) > /dev/null
         make install
