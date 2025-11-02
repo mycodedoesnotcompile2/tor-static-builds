@@ -202,10 +202,12 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: binary-$ARCH-$LIBC
+        name: binary-${{ matrix.ARCH }}-${{ matrix.LIBC }}
         path: |
           ${{ env.TOR_STATIC_PACKAGE_FILE_PATH }}
           ${{ env.TOR_STATIC_PACKAGE_HASH_PATH }}
+
+######################################################
 
   deploy_release:
     needs: build
