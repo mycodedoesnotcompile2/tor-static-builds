@@ -112,6 +112,15 @@ jobs:
 
         find $OPENSSL_BUILD_PATH -type f -exec ls -alh {} \;
 
+        if [[ $ARCH =~ "aarch64" ]]; then
+          export OPENSSL_LIB_DIR="$OPENSSL_BUILD_PATH/lib"
+          export OPENSSL_LIB_DIR_PKGCONFIG="$OPENSSL_BUILD_PATH/lib/pkgconfig"
+        fi
+        if [[ $ARCH =~ "x86_64" ]]; then
+          export OPENSSL_LIB_DIR="$OPENSSL_BUILD_PATH/lib64"
+          export OPENSSL_LIB_DIR_PKGCONFIG="$OPENSSL_BUILD_PATH/lib64/pkgconfig"
+        fi
+
 
     - name: Compile ZLIB
       run: |
@@ -123,7 +132,9 @@ jobs:
         make -j$(nproc) > /dev/null
         make install
 
-        find $ZLIB_BUILD_PATH -type f
+        find $ZLIB_BUILD_PATH -type f -exec ls -alh {} \;
+
+
 
     - name: Compile Libevent
       run: |
@@ -132,24 +143,16 @@ jobs:
         
         cd $LIBEVENT_EXTRACT_DIR_PATH
 
-        if [[ $ARCH =~ "aarch64" ]]; then
-          PKG_CONFIG_PATH="$OPENSSL_BUILD_PATH/lib/pkgconfig"
-          export PKG_CONFIG_PATH
-        fi
-        if [[ $ARCH =~ "x86_64" ]]; then
-          PKG_CONFIG_PATH="$OPENSSL_BUILD_PATH/lib64/pkgconfig"
-          export PKG_CONFIG_PATH
-        fi
-        
-        ./configure --prefix=$LIBEVENT_BUILD_PATH --disable-shared --enable-static --with-pic
+        PKG_CONFIG_PATH=$OPENSSL_LIB_DIR_PKGCONFIG ./configure --prefix=$LIBEVENT_BUILD_PATH --disable-shared --enable-static --with-pic
         make -j$(nproc) > /dev/null
         make install
 
-        find $LIBEVENT_BUILD_PATH -type f
+        find $LIBEVENT_BUILD_PATH -type f -exec ls -alh {} \;
 
     - name: Compile TOR
       run: |
         cd /tmp/
+        
         tar -xzf $TOR_TAR_PATH -C $TOR_EXTRACT_DIR_PATH --strip-components=1
         
         cd $TOR_EXTRACT_DIR_PATH
@@ -157,10 +160,15 @@ jobs:
                                       --disable-asciidoc --disable-manpage --disable-html-manual --disable-unittests \
                                       --enable-static-tor --enable-static-libevent \
                                       --with-libevent-dir=$LIBEVENT_BUILD_PATH \
-                                      --enable-static-openssl --with-openssl-dir=$OPENSSL_BUILD_PATH/lib64 \
+                                      --enable-static-openssl --with-openssl-dir=$OPENSSL_LIB_DIR \
                                       --enable-static-zlib --with-zlib-dir=$ZLIB_BUILD_PATH
         
         make -j$(nproc) > /dev/null
         make install
 
-        find $TOR_STATIC_BUILD_PATH -type f
+        find $TOR_STATIC_BUILD_PATH -type f -exec ls -alh {} \;
+
+    - name: Check static-ness of TOR binaries
+      run: |
+        cd /tmp/
+        ldd "TOR_STATIC_BUILD_PATH/bin/tor"
