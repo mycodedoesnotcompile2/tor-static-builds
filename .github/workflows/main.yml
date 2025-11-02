@@ -113,14 +113,14 @@ jobs:
         find $OPENSSL_BUILD_PATH -type f -exec ls -alh {} \;
 
         if [[ $ARCH =~ "aarch64" ]]; then
-          export OPENSSL_LIB_DIR="$OPENSSL_BUILD_PATH/lib"
-          export OPENSSL_LIB_DIR_PKGCONFIG="$OPENSSL_BUILD_PATH/lib/pkgconfig"
+          echo "OPENSSL_LIB_DIR=$OPENSSL_BUILD_PATH/lib" >> $GITHUB_ENV
+          echo "OPENSSL_LIB_DIR_PKGCONFIG=$OPENSSL_LIB_DIR/pkgconfig" >> $GITHUB_ENV
+        
+        elif [[ $ARCH =~ "x86_64" ]]; then
+          echo "OPENSSL_LIB_DIR=$OPENSSL_BUILD_PATH/lib64" >> $GITHUB_ENV
+          echo "OPENSSL_LIB_DIR_PKGCONFIG=$OPENSSL_LIB_DIR/pkgconfig" >> $GITHUB_ENV
         fi
-        if [[ $ARCH =~ "x86_64" ]]; then
-          export OPENSSL_LIB_DIR="$OPENSSL_BUILD_PATH/lib64"
-          export OPENSSL_LIB_DIR_PKGCONFIG="$OPENSSL_BUILD_PATH/lib64/pkgconfig"
-        fi
-
+        
 
     - name: Compile ZLIB
       run: |
@@ -133,7 +133,6 @@ jobs:
         make install
 
         find $ZLIB_BUILD_PATH -type f -exec ls -alh {} \;
-
 
 
     - name: Compile Libevent
