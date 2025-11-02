@@ -46,8 +46,8 @@ jobs:
         if [[ $CONTAINER =~ "debian" ]]; then
           apt update && apt install -y build-essential file sudo bash
           
-          sudo dpkg --get-selections | grep -i libssl
-          $APT autoremove --purge libssl-dev
+          #sudo dpkg --get-selections | grep -i libssl
+          #$APT autoremove --purge libssl-dev
         fi
         
         if [[ $CONTAINER =~ "alpine" ]]; then
@@ -55,10 +55,10 @@ jobs:
           apk del libssl-dev
         fi
         
-        sudo chsh root -s /bin/bash
-        sudo chsh runner -s /bin/bash
+        #sudo chsh root -s /bin/bash
+        #sudo chsh runner -s /bin/bash
     
-    - name: Check if libssl-dev is not installed
-      run: |
+    # - name: Check if libssl-dev is not installed
+    #   run: |
         
-        sudo dpkg --get-selections | grep -i libssl
+    #     sudo dpkg --get-selections | grep -i libssl
