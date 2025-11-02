@@ -32,6 +32,7 @@ env:
   TOR_EXTRACT_DIR_PATH: "/tmp/tor"
 
   TOR_STATIC_BUILD_PATH: "/tmp/tor_build"
+  TOR_STATIC_PACKAGE_DIR_PATH: "/tmp/tor_package"
   
 
 defaults:
@@ -90,7 +91,7 @@ jobs:
     - name: Create the necessary folders
       run: |
         cd /tmp/
-        mkdir -p $OPENSSL_EXTRACT_DIR_PATH $ZLIB_EXTRACT_DIR_PATH $LIBEVENT_EXTRACT_DIR_PATH $TOR_EXTRACT_DIR_PATH
+        mkdir -p $OPENSSL_EXTRACT_DIR_PATH $ZLIB_EXTRACT_DIR_PATH $LIBEVENT_EXTRACT_DIR_PATH $TOR_EXTRACT_DIR_PATH $TOR_STATIC_PACKAGE_DIR_PATH
 
     - name: Download the necessary packages
       run: |
@@ -170,4 +171,29 @@ jobs:
     - name: Check static-ness of TOR binaries
       run: |
         cd /tmp/
-        ldd "TOR_STATIC_BUILD_PATH/bin/tor"
+        ldd "$TOR_STATIC_BUILD_PATH/bin/tor"
+
+
+    - name: Make package
+      run: |
+        cd $TOR_STATIC_PACKAGE_DIR_PATH
+        
+        TOR_PREFIX=$(basename $TOR_DL .tar.gz)
+        
+        TOR_STATIC_PACKAGE_FILENAME="$TOR_PREFIX-linux-$ARCH-$LIBC.zip"
+        TOR_STATIC_PACKAGE_FILE_PATH="$TOR_STATIC_PACKAGE_DIR_PATH/$TOR_STATIC_PACKAGE_FILENAME"
+        echo "TOR_STATIC_PACKAGE_FILE_PATH=$TOR_STATIC_PACKAGE_FILE_PATH" >> $GITHUB_ENV
+        
+        TOR_STATIC_PACKAGE_HASH_PATH="$TOR_STATIC_PACKAGE_DIR_PATH/$TOR_STATIC_PACKAGE_FILENAME.sha256.txt"
+        echo "TOR_STATIC_PACKAGE_HASH_PATH=$TOR_STATIC_PACKAGE_HASH_PATH" >> $GITHUB_ENV
+        
+        zip -r "$TOR_STATIC_PACKAGE_FILENAME" "$TOR_STATIC_BUILD_PATH"
+        sha256sum --tag "$(basename "$TOR_STATIC_PACKAGE_FILENAME")" | tee "$TOR_STATIC_PACKAGE_HASH_PATH"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: binary-$ARCH-$LIBC
+        path: |
+          ${{ env.TOR_STATIC_PACKAGE_FILE_PATH }}
+          ${{ env.TOR_STATIC_PACKAGE_HASH_PATH }}
