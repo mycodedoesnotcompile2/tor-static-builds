@@ -55,12 +55,12 @@ jobs:
         if [[ $CONTAINER =~ "debian" ]]; then
           $APT update && $APT install -y build-essential file sudo bash
           
-          $APT dpkg --get-selections | grep -i libssl
+          dpkg --get-selections | grep -i libssl
           $APT autoremove --purge libssl-dev
         fi
         
         if [[ $CONTAINER =~ "alpine" ]]; then
-          apk update && apk add build-essential file sudo bash
+          apk update && apk add build-base file sudo bash
           apk del libssl-dev
         fi
         
