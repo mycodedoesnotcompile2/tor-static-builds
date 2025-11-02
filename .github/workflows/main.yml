@@ -13,11 +13,6 @@ env:
   APT: sudo apt -y -qq -o=Dpkg::Use-Pty=0
 
 
-defaults:
-  run:
-    # necessary for windows
-    shell: bash
-
 jobs:
   build:
     strategy:
@@ -46,7 +41,7 @@ jobs:
     steps:
     - name: Install prerequisites
       run: |
-        $APT update && $APT install -y build-essential file
+        $APT update && $APT install -y build-essential file sudo bash
     
     - name: Check if libssl-dev is not installed
       run: |
