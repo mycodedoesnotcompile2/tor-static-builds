@@ -85,7 +85,7 @@ jobs:
         fi
         
         if [[ $CONTAINER =~ "alpine" ]]; then
-          apk -q update && apk add build-base file sudo bash shadow musl wget make tar perl linux-headers pkgconfig
+          apk -q update && apk add build-base file sudo bash shadow musl wget make tar perl linux-headers pkgconfig zip
           apk del openssl-dev
         fi
         
