@@ -12,6 +12,9 @@ env:
   ONIUX_ROOT_DIR: /tmp/oniux
   APT: sudo apt -y -qq -o=Dpkg::Use-Pty=0
 
+defaults:
+  run:
+    shell: bash
 
 jobs:
   build:
@@ -30,7 +33,7 @@ jobs:
           - CONTAINER: debian:bookworm
             LIBC: glibc
 
-          - CONTAINER: alpine:latest
+          - CONTAINER: frolvlad/alpine‑bash:latest
             LIBC: musl
       
             
@@ -41,14 +44,14 @@ jobs:
     steps:
     - name: Install prerequisites
       run: |
-        if [[ $CONTAINER =~ debian ]]; then
+        if [[ $CONTAINER =~ "debian" ]]; then
           $APT update && $APT install -y build-essential file sudo bash
           
           sudo dpkg --get-selections | grep -i libssl
           $APT autoremove --purge libssl-dev
         fi
         
-        if [[ $CONTAINER =~ debian ]]; then
+        if [[ $CONTAINER =~ "alpine" ]]; then
           apk update && apk add -y build-essential file sudo bash
           apk del libssl-dev
         fi
