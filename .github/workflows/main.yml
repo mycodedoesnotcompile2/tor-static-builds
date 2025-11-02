@@ -10,7 +10,8 @@ permissions:
 
 env:
   ONIUX_ROOT_DIR: /tmp/oniux
-  APT: sudo apt -y -qq -o=Dpkg::Use-Pty=0
+  APT: apt -y -qq -o=Dpkg::Use-Pty=0
+  S_APT: sudo $APT
 
 defaults:
   run:
