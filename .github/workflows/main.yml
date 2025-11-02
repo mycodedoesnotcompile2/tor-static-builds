@@ -70,6 +70,9 @@ jobs:
       ARCH: ${{ matrix.ARCH }}
       CONTAINER: ${{ matrix.CONTAINER }}
       LIBC: ${{ matrix.LIBC }}
+
+    outputs:
+      TOR_VERSION: ${{ steps.release_version.outputs.TOR_VERSION }}
   
     steps:
     - name: Install prerequisites
@@ -168,17 +171,22 @@ jobs:
 
         find $TOR_STATIC_BUILD_PATH -type f -exec ls -alh {} \;
 
-    - name: Check static-ness of TOR binaries
+    - name: Check static-ness of TOR binaries and display version
       run: |
         cd /tmp/
-        ldd "$TOR_STATIC_BUILD_PATH/bin/tor"
+        
+        ldd "$TOR_STATIC_BUILD_PATH/bin/tor" || true
+        "$TOR_STATIC_BUILD_PATH/bin/tor" --version
 
 
     - name: Make package
+      id: release_version
       run: |
         cd $TOR_STATIC_PACKAGE_DIR_PATH
         
         TOR_PREFIX=$(basename $TOR_DL .tar.gz)
+        TOR_VERSION="$(date +"%Y-%m-%dT%H:%M:%S%z)-$TOR_PREFIX"
+        echo "TOR_VERSION=$TOR_PREFIX" >> $GITHUB_OUTPUT
         
         TOR_STATIC_PACKAGE_FILENAME="$TOR_PREFIX-linux-$ARCH-$LIBC.zip"
         TOR_STATIC_PACKAGE_FILE_PATH="$TOR_STATIC_PACKAGE_DIR_PATH/$TOR_STATIC_PACKAGE_FILENAME"
@@ -190,6 +198,7 @@ jobs:
         zip -r "$TOR_STATIC_PACKAGE_FILENAME" "$TOR_STATIC_BUILD_PATH"
         sha256sum --tag "$(basename "$TOR_STATIC_PACKAGE_FILENAME")" | tee "$TOR_STATIC_PACKAGE_HASH_PATH"
 
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
@@ -197,3 +206,39 @@ jobs:
         path: |
           ${{ env.TOR_STATIC_PACKAGE_FILE_PATH }}
           ${{ env.TOR_STATIC_PACKAGE_HASH_PATH }}
+
+
+  deploy_release:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+       TOR_VERSION: ${{ needs.build.outputs.TOR_VERSION }}
+    
+    steps:
+     - name: Download Artifact
+       uses: actions/download-artifact@v4
+       with:
+        pattern: binary-*
+        merge-multiple: true
+        path: /tmp/results
+
+     - name: List target
+       run: |
+          cd "/tmp/results"
+          ls -alh
+  
+          RELEASE_NOTES="/tmp/release_notes.txt"
+          echo "RELEASE_NOTES=$RELEASE_NOTES" >> $GITHUB_ENV
+          
+          cat *.sha256.txt > "$RELEASE_NOTES"
+          mkdir -p "/tmp/hashes"
+          mv -f *.sha256.txt "/tmp/hashes/"
+  
+     - name: Create a new Github release
+       uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 #v2.3.2
+       with:
+         body_path: ${{ env.RELEASE_NOTES }}
+         name: ${{ env.TOR_VERSION }}
+         tag_name: ${{ env.TOR_VERSION }}
+         files: |
+           /tmp/results/tor-*
