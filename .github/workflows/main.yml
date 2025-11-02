@@ -43,16 +43,20 @@ jobs:
       run: |
         if [[ $CONTAINER =~ debian ]]; then
           $APT update && $APT install -y build-essential file sudo bash
+          
+          sudo dpkg --get-selections | grep -i libssl
+          $APT autoremove --purge libssl-dev
         fi
         
         if [[ $CONTAINER =~ debian ]]; then
           apk update && apk add -y build-essential file sudo bash
+          apk del libssl-dev
         fi
         
-        chsh root -s /bin/bash
-        chsh runner -s /bin/bash
+        sudo chsh root -s /bin/bash
+        sudo chsh runner -s /bin/bash
     
     - name: Check if libssl-dev is not installed
       run: |
-        $APT autoremove --purge libssl-dev
+        
         sudo dpkg --get-selections | grep -i libssl
