@@ -20,17 +20,16 @@ env:
   ZLIB_DL: "https://zlib.net/current/zlib.tar.gz"
   ZLIB_TAR_PATH: "/tmp/zlib.tar.gz"
   ZLIB_EXTRACT_DIR_PATH: "/tmp/zlib"
-  ZLIB_BUILD_PATH: "$ZLIB_EXTRACT_DIR_PATH/install"
+  ZLIB_BUILD_PATH: "/tmp/zlib/install"
 
   LIBEVENT_DL: "https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz"
   LIBEVENT_TAR_PATH: "/tmp/libevent.tar.gz"
   LIBEVENT_EXTRACT_DIR_PATH: "/tmp/libevent"
-  LIBEVENT_BUILD_PATH: "$LIBEVENT_EXTRACT_DIR_PATH/install"
+  LIBEVENT_BUILD_PATH: "/tmp/libevent/install"
 
   TOR_DL: "https://dist.torproject.org/tor-0.4.8.19.tar.gz"
   TOR_TAR_PATH: "/tmp/tor.tar.gz"
   TOR_EXTRACT_DIR_PATH: "/tmp/tor"
-  TOR_BUILD_PATH: "$TOR_EXTRACT_DIR_PATH/install"
 
   TOR_STATIC_BUILD_PATH: "/tmp/tor_build"
   
@@ -111,7 +110,7 @@ jobs:
         make -j$(nproc) > /dev/null
         make install
 
-        find $OPENSSL_BUILD_PATH -type f -ls
+        find $OPENSSL_BUILD_PATH -type f -exec ls -alh {} \;
 
 
     - name: Compile ZLIB
@@ -124,7 +123,7 @@ jobs:
         make -j$(nproc) > /dev/null
         make install
 
-        find $ZLIB_BUILD_PATH -type f -ls
+        find $ZLIB_BUILD_PATH -type f
 
     - name: Compile Libevent
       run: |
@@ -136,7 +135,7 @@ jobs:
         make -j$(nproc) > /dev/null
         make install
 
-        find $LIBEVENT_BUILD_PATH -type f -ls
+        find $LIBEVENT_BUILD_PATH -type f
 
     - name: Compile TOR
       run: |
@@ -154,4 +153,4 @@ jobs:
         make -j$(nproc) > /dev/null
         make install
 
-        find $TOR_STATIC_BUILD_PATH -type f -ls
+        find $TOR_STATIC_BUILD_PATH -type f
