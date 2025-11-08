@@ -41,7 +41,6 @@ defaults:
 
 jobs:
   build:
-    #continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -57,12 +56,8 @@ jobs:
           - CONTAINER: debian:bookworm
             LIBC: glibc
 
-            # remember to build a custom alpine image with bash
           - CONTAINER: alpine:latest
             LIBC: musl
-          
-          #- CONTAINER: frolvlad/alpine-bash:latest
-          #  LIBC: musl
             
     runs-on: ${{ matrix.OS }}
     
@@ -95,7 +90,7 @@ jobs:
         fi
         
         if [[ $CONTAINER =~ "alpine" ]]; then
-          apk -q update && apk add build-base file sudo bash shadow musl wget make tar perl linux-headers pkgconfig zip
+          apk -q update && apk add build-base file sudo bash shadow musl wget make tar perl linux-headers pkgconfig zip coreutils
           apk del openssl-dev
         fi
         
@@ -133,8 +128,7 @@ jobs:
         elif [[ $ARCH =~ "x86_64" ]]; then
           echo "OPENSSL_LIB_DIR=$OPENSSL_BUILD_PATH/lib64" >> $GITHUB_ENV
           echo "OPENSSL_LIB_DIR_PKGCONFIG=$OPENSSL_BUILD_PATH/lib64/pkgconfig" >> $GITHUB_ENV
-        fi
-        
+        fi 
 
     - name: Compile ZLIB
       run: |
