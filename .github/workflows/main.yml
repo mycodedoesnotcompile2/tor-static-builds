@@ -31,7 +31,7 @@ env:
   TOR_TAR_PATH: "/tmp/tor.tar.gz"
   TOR_EXTRACT_DIR_PATH: "/tmp/tor"
 
-  TOR_STATIC_BUILD_PATH: "/tmp/tor_build"
+  TOR_STATIC_BUILD_PATH: "/tmp/tor_static"
   TOR_STATIC_PACKAGE_DIR_PATH: "/tmp/tor_package"
   
 
@@ -74,7 +74,6 @@ jobs:
       TOR_VERSION: ${{ steps.release_version.outputs.TOR_VERSION }}
       ARTIFACT_ARM64_MUSL_ZIP_URL: ${{ steps.artifact_arm64_musl_urls.outputs.ARTIFACT_ARM64_MUSL_ZIP_URL }}
       ARTIFACT_ARM64_MUSL_HASH_URL: ${{ steps.artifact_arm64_musl_urls.outputs.ARTIFACT_ARM64_MUSL_HASH_URL }}
-      
   
     steps:
     - name: Install bash prerequisites for alpine
@@ -205,7 +204,8 @@ jobs:
         zip -r "$TOR_STATIC_PACKAGE_FILENAME" "$TOR_STATIC_BUILD_PATH"
         sha256sum --tag "$(basename "$TOR_STATIC_PACKAGE_FILENAME")" | tee "$TOR_STATIC_PACKAGE_HASH_PATH"
 
-    - name: Upload artifact for all containers except arm64-musl (because Alpine ARM64 is not supported by upload-artifact, https://github.com/actions/upload-artifact/issues/739)
+      
+    - name: Upload artifact for all containers except arm64-musl
       uses: actions/upload-artifact@v4
       if: ${{ !(contains(env.ARCH, 'aarch64') && contains(env.LIBC, 'musl')) }}
       with:
@@ -215,13 +215,14 @@ jobs:
           ${{ env.TOR_STATIC_PACKAGE_HASH_PATH }}
 
 
+    # this is step is necessary because Alpine ARM64 is not supported by the "upload-artifact"" action (cf. https://github.com/actions/upload-artifact/issues/739)
     - name: Upload artifact for arm64-musl
       id: artifact_arm64_musl_urls
       if: ${{ contains(env.ARCH, 'aarch64') && contains(env.LIBC, 'musl') }}
       run: |
         cd /tmp/
-        ARTIFACT_ARM64_MUSL_ZIP_URL=$(curl --upload-file $TOR_STATIC_PACKAGE_FILE_PATH https://transfer.adminforge.de)
-        ARTIFACT_ARM64_MUSL_HASH_URL=$(curl --upload-file $TOR_STATIC_PACKAGE_HASH_PATH https://transfer.adminforge.de)
+        ARTIFACT_ARM64_MUSL_ZIP_URL=$(curl -sS --upload-file $TOR_STATIC_PACKAGE_FILE_PATH https://transfer.adminforge.de)
+        ARTIFACT_ARM64_MUSL_HASH_URL=$(curl -sS --upload-file $TOR_STATIC_PACKAGE_HASH_PATH https://transfer.adminforge.de)
 
         echo "ARTIFACT_ARM64_MUSL_ZIP_URL=$ARTIFACT_ARM64_MUSL_ZIP_URL" >> $GITHUB_OUTPUT
         echo "ARTIFACT_ARM64_MUSL_HASH_URL=$ARTIFACT_ARM64_MUSL_HASH_URL" >> $GITHUB_OUTPUT
@@ -238,20 +239,22 @@ jobs:
        ARTIFACT_ARM64_MUSL_HASH_URL: ${{ needs.build.outputs.ARTIFACT_ARM64_MUSL_HASH_URL }}
     
     steps:
-     - name: Download Artifact
+     - name: Download artifacts
        uses: actions/download-artifact@v4
        with:
         pattern: binary-*
         merge-multiple: true
         path: /tmp/results
 
-     - name: List target
+     - name: Download arm64-musl artifact
        run: |
          cd "/tmp/results"
          wget -nv "$ARTIFACT_ARM64_MUSL_ZIP_URL"
          wget -nv "$ARTIFACT_ARM64_MUSL_HASH_URL"
+
+         sha256sum -c *-aarch64-musl.zip.sha256.txt
          
-     - name: List target
+     - name: List builds
        run: |
           cd "/tmp/results"
           ls -alh
