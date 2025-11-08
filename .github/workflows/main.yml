@@ -207,7 +207,7 @@ jobs:
 
     - name: Upload artifact for all containers except arm64-musl
       uses: actions/upload-artifact@v4
-      if: (!contains(env.ARCH, 'aarch64')) && (!contains(env.LIBC, 'musl'))
+      if: ${{ !contains(env.ARCH, 'aarch64') && !contains(env.LIBC, 'musl') }}
       with:
         name: binary-${{ matrix.ARCH }}-${{ matrix.LIBC }}
         path: |
@@ -217,11 +217,11 @@ jobs:
 
     - name: Upload artifact for arm64-musl
       id: artifact_arm64_musl_urls
-      if: (contains(env.ARCH, 'aarch64')) && (contains(env.LIBC, 'musl'))
+      if: ${{ contains(env.ARCH, 'aarch64') && contains(env.LIBC, 'musl') }}
       run: |
         cd /tmp/
-        ARTIFACT_ARM64_MUSL_ZIP_URL=$(curl --upload-file $TOR_STATIC_PACKAGE_FILE_PATH https://transfer.adminforge.de)
-        ARTIFACT_ARM64_MUSL_HASH_URL=$(curl --upload-file $TOR_STATIC_PACKAGE_HASH_PATH https://transfer.adminforge.de)
+        ARTIFACT_ARM64_MUSL_ZIP_URL=$(curl -s --upload-file $TOR_STATIC_PACKAGE_FILE_PATH https://transfer.adminforge.de)
+        ARTIFACT_ARM64_MUSL_HASH_URL=$(curl -s --upload-file $TOR_STATIC_PACKAGE_HASH_PATH https://transfer.adminforge.de)
 
         echo "ARTIFACT_ARM64_MUSL_ZIP_URL=$ARTIFACT_ARM64_MUSL_ZIP_URL" >> $GITHUB_OUTPUT
         echo "ARTIFACT_ARM64_MUSL_HASH_URL=$ARTIFACT_ARM64_MUSL_HASH_URL" >> $GITHUB_OUTPUT
