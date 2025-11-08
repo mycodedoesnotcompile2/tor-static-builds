@@ -234,6 +234,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
        TOR_VERSION: ${{ needs.build.outputs.TOR_VERSION }}
+       ARTIFACT_ARM64_MUSL_ZIP_URL: ${{ needs.build.outputs.ARTIFACT_ARM64_MUSL_ZIP_URL }}
+       ARTIFACT_ARM64_MUSL_HASH_URL: ${{ needs.build.outputs.ARTIFACT_ARM64_MUSL_HASH_URL }}
     
     steps:
      - name: Download Artifact
@@ -243,6 +245,12 @@ jobs:
         merge-multiple: true
         path: /tmp/results
 
+     - name: List target
+       run: |
+         cd "/tmp/results"
+         wget -nv "$ARTIFACT_ARM64_MUSL_ZIP_URL"
+         wget -nv "$ARTIFACT_ARM64_MUSL_HASH_URL"
+         
      - name: List target
        run: |
           cd "/tmp/results"
