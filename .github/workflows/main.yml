@@ -77,7 +77,7 @@ jobs:
     - name: Install bash prerequisites for alpine
       if: contains(env.CONTAINER, 'alpine')
       run: |
-        apk add bash
+        apk update && apk add bash
       shell: sh
       
     - name: Install prerequisites
