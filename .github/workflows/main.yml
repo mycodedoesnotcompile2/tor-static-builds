@@ -72,6 +72,9 @@ jobs:
 
     outputs:
       TOR_VERSION: ${{ steps.release_version.outputs.TOR_VERSION }}
+      ARTIFACT_ARM64_MUSL_ZIP_URL: ${{ steps.artifact_arm64_musl_urls.outputs.ARTIFACT_ARM64_MUSL_ZIP_URL }}
+      ARTIFACT_ARM64_MUSL_HASH_URL: ${{ steps.artifact_arm64_musl_urls.outputs.ARTIFACT_ARM64_MUSL_HASH_URL }}
+      
   
     steps:
     - name: Install bash prerequisites for alpine
@@ -90,7 +93,7 @@ jobs:
         fi
         
         if [[ $CONTAINER =~ "alpine" ]]; then
-          apk -q update && apk add build-base file sudo bash shadow musl wget make tar perl linux-headers pkgconfig zip coreutils
+          apk -q update && apk add build-base file sudo bash shadow musl wget make tar perl linux-headers pkgconfig zip coreutils curl
           apk del openssl-dev
         fi
         
@@ -202,14 +205,27 @@ jobs:
         zip -r "$TOR_STATIC_PACKAGE_FILENAME" "$TOR_STATIC_BUILD_PATH"
         sha256sum --tag "$(basename "$TOR_STATIC_PACKAGE_FILENAME")" | tee "$TOR_STATIC_PACKAGE_HASH_PATH"
 
-
-    - name: Upload artifact
+    - name: Upload artifact for all containers except arm64-musl
       uses: actions/upload-artifact@v4
+      if: (!contains(env.ARCH, 'aarch64')) AND (!contains(env.LIBC, 'musl'))
       with:
         name: binary-${{ matrix.ARCH }}-${{ matrix.LIBC }}
         path: |
           ${{ env.TOR_STATIC_PACKAGE_FILE_PATH }}
           ${{ env.TOR_STATIC_PACKAGE_HASH_PATH }}
+
+
+    - name: Upload artifact for arm64-musl
+      id: artifact_arm64_musl_urls
+      if: (contains(env.ARCH, 'aarch64')) AND (contains(env.LIBC, 'musl'))
+      run: |
+        cd /tmp/
+        ARTIFACT_ARM64_MUSL_ZIP_URL=$(curl --upload-file $TOR_STATIC_PACKAGE_FILE_PATH https://transfer.adminforge.de)
+        ARTIFACT_ARM64_MUSL_HASH_URL=$(curl --upload-file $TOR_STATIC_PACKAGE_HASH_PATH https://transfer.adminforge.de)
+
+        echo "ARTIFACT_ARM64_MUSL_ZIP_URL=$ARTIFACT_ARM64_MUSL_ZIP_URL" >> $GITHUB_OUTPUT
+        echo "ARTIFACT_ARM64_MUSL_HASH_URL=$ARTIFACT_ARM64_MUSL_HASH_URL" >> $GITHUB_OUTPUT
+        
 
 ######################################################
 
