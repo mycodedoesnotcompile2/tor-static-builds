@@ -58,8 +58,11 @@ jobs:
             LIBC: glibc
 
             # remember to build a custom alpine image with bash
-          - CONTAINER: frolvlad/alpine-bash:latest
+          - CONTAINER: alpine:latest
             LIBC: musl
+          
+          #- CONTAINER: frolvlad/alpine-bash:latest
+          #  LIBC: musl
             
     runs-on: ${{ matrix.OS }}
     
@@ -76,6 +79,12 @@ jobs:
       TOR_VERSION: ${{ steps.release_version.outputs.TOR_VERSION }}
   
     steps:
+    - name: Install bash prerequisites for alpine
+      if: contains($CONTAINER, 'alpine')
+      run: |
+        apk add bash
+      shell: sh
+      
     - name: Install prerequisites
       run: |
         if [[ $CONTAINER =~ "debian" ]]; then
