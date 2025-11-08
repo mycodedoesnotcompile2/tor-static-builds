@@ -205,7 +205,7 @@ jobs:
         zip -r "$TOR_STATIC_PACKAGE_FILENAME" "$TOR_STATIC_BUILD_PATH"
         sha256sum --tag "$(basename "$TOR_STATIC_PACKAGE_FILENAME")" | tee "$TOR_STATIC_PACKAGE_HASH_PATH"
 
-    - name: Upload artifact for all containers except arm64-musl
+    - name: Upload artifact for all containers except arm64-musl (because Alpine ARM64 is not supported by upload-artifact, https://github.com/actions/upload-artifact/issues/739)
       uses: actions/upload-artifact@v4
       if: ${{ !contains(env.ARCH, 'aarch64') && !contains(env.LIBC, 'musl') }}
       with:
