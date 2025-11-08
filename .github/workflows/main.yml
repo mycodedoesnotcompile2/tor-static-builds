@@ -80,7 +80,7 @@ jobs:
   
     steps:
     - name: Install bash prerequisites for alpine
-      if: contains($CONTAINER, 'alpine')
+      if: contains(env.CONTAINER, 'alpine')
       run: |
         apk add bash
       shell: sh
