@@ -20,6 +20,7 @@ Interesting resources
 * https://forum.torproject.org/t/tor-core-build-under-windows-64/16662
 * https://g.blicky.net/tor-static.git/tree/build.sh
 * https://gist.github.com/rampageX/27e6c2b4ce60fbe4e6427e04ca8ea3f7
+* https://github.com/fugitivus/tor-static
 
 Copyright and license
 ---------------------
