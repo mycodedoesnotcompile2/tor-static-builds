@@ -27,7 +27,7 @@ env:
   LIBEVENT_EXTRACT_DIR_PATH: "/tmp/libevent"
   LIBEVENT_BUILD_PATH: "/tmp/libevent/install"
 
-  TOR_DL: "https://dist.torproject.org/tor-0.4.8.21.tar.gz"
+  TOR_DL: "https://dist.torproject.org/tor-0.4.9.5.tar.gz"
   TOR_TAR_PATH: "/tmp/tor.tar.gz"
   TOR_EXTRACT_DIR_PATH: "/tmp/tor"
 
